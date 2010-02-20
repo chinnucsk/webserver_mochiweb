@@ -4,7 +4,8 @@
 -export([db_create/1, db_delete/1, db_info/1, db_list/0]).
 -export([doc_create/2, doc_create/3, doc_get/2, doc_get/3, doc_delete/2, doc_update/3]).
 -export([view_create/3, view_create/4, view_delete/2, view_get/2, view_get/3,
-	 view_get/4, view_access/2, view_access/3, view_access/4]).
+	 view_get/4, view_access/2, view_access/3, view_access/4,
+	 view_access_c/3]).
 
 -define(KEYS_TO_REMOVE, ["_id", "_rev", "_deleted_conflicts"]).
 -define(KEYS_TO_UNFRIENDLYAZE, [key, startkey, endkey, keys]).
@@ -117,6 +118,12 @@ view_access(DbName, DesignName, Options, Remove) ->
     do_call_get(ecouch, view_access, [DbName, DesignName, DesignName, NOptions],
 	       Remove).
 
+view_access_c(DbName, DesignName, Options) ->
+    NOptions = user_unfriendlyaze_c(Options),
+    do_call_get(ecouch, view_access, [DbName, DesignName, DesignName, NOptions],
+		true).
+    
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Handlers
@@ -193,6 +200,16 @@ user_friendlyaze_proplist2([], Res) ->
     Res.    
 
 user_friendlyaze(V) when is_binary(V) -> btx(V);
+user_friendlyaze(V) when is_list(V) -> 
+    lists:foldr(
+      fun(E,Acc) ->
+	      case is_binary(E) of
+		  true -> [btx(E)|Acc];
+		  false -> [E|Acc]
+	      end
+      end,
+      [],
+      V);
 user_friendlyaze(V) -> V.
 
 user_friendlyaze_query_response(ResponseData, Remove) ->
@@ -211,13 +228,48 @@ user_unfriendlyaze([{K,V} = H|T], Res) ->
 		keys ->
 		    user_unfriendlyaze(T, [{K,transform_keys(V)}|Res]);
 		_ ->
-		    user_unfriendlyaze(T, [{K,transform(V)}|Res])
+		    case is_list(V) of
+			true ->
+			    user_unfriendlyaze(
+			      T, [{K,"\"" ++ V ++ "\""}|Res]);
+			false ->
+			    user_unfriendlyaze(T, [{K,V}|Res])
+		    end
 	    end;
 	false ->
 	    user_unfriendlyaze(T, [H|Res])
     end;
 user_unfriendlyaze([], Res) ->
     Res.
+
+user_unfriendlyaze_c(Data) ->
+    user_unfriendlyaze_c(Data, []).
+user_unfriendlyaze_c([{K,V} = H|T], Res) ->
+    case lists:member(K, ?KEYS_TO_UNFRIENDLYAZE) of
+	true ->
+	    case K of
+		keys ->
+		    user_unfriendlyaze_c(T, [{K,transform_keys(V)}|Res]);
+		_ ->
+		    NV = lists:foldl(
+			   fun(E, Acc) ->
+				   case is_list(E) of
+				       true ->
+					   ["\"" ++ E ++ "\""|Acc];
+				       false ->
+					   [E|Acc]
+				   end
+			   end, [], V),
+		    NV2 = "[" ++ string:join(NV, ",") ++ "]",
+		    user_unfriendlyaze_c(T, [{K, NV2}|Res])
+	    end;
+	false ->
+	    user_unfriendlyaze_c(T, [H|Res])
+    end;
+user_unfriendlyaze_c([], Res) ->
+    Res.
+
+
 
 btx(B) ->
     L = binary_to_list(B),
@@ -231,19 +283,21 @@ bta(B) ->
     list_to_atom(binary_to_list(B)).
 
 extract({obj, E}, Remove) ->
-    {obj, Value} = proplists:get_value("value", E),
-    Aux = [{"key", proplists:get_value("key", E)} | Value],
+    V = case proplists:get_value("value", E) of
+	{obj, Value} -> Value;
+	Value -> [{"value", Value}]
+    end,
+    Aux = [{"key", proplists:get_value("key", E)} | V],
     user_friendlyaze_proplist(Aux, Remove).
 
 transform_keys(V) ->
     lists:foldr(
       fun(E, Acc) ->
-	      [list_to_binary(to_list(E)) | Acc]
+	      [list_to_binary(E) | Acc]
       end,
       [],
       V).
-transform(V) ->
-    "\"" ++ to_list(V) ++ "\"".
+
 to_list(V) when is_integer(V) ->
     integer_to_list(V);
 to_list(V) when is_float(V) ->

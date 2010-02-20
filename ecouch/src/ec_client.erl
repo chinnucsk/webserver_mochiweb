@@ -188,7 +188,7 @@ url_encode([H|T]) ->
             [H|url_encode(T)];
         H >= $0, $9 >= H ->
             [H|url_encode(T)];
-        H == $_; H == $.; H == $-; H == $/; H == $: ->
+        H == $_; H == $.; H == $-; H == $/; H == $:; H == $[; H == $] ->
             [H|url_encode(T)];
         H == $& ->
             [$%, $2, $6 | url_encode(T)];
