@@ -1,4 +1,4 @@
-export ERL_LIBS=../mochiweb/
+export ERL_LIBS=../mochiweb/:../ecouch
 
 compile:
 	erl -make
