@@ -31,8 +31,8 @@ start(Port) ->
 %% GEN_SERVER CALLBACKS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 init([Port]) ->
-    mochiweb_http:start([{port, Port}, 
-			 {loop, fun dispatch_request/1}]).
+    db:start(),
+    mochiweb_http:start([{port, Port}, {loop, fun dispatch_request/1}]).
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -46,6 +46,7 @@ handle_info(_Info, State) ->
 
 terminate(_Reason, _State) ->
     mochiweb_http:stop(),
+    db:stop(),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

@@ -10,9 +10,49 @@
 -define(KEYS_TO_REMOVE, ["_id", "_rev", "_deleted_conflicts"]).
 -define(KEYS_TO_UNFRIENDLYAZE, [key, startkey, endkey, keys]).
 
+-include("webapp.hrl").
+
 start() ->
     ok = application:start(inets),
-    ok = application:start(ecouch).
+    ok = application:start(ecouch),
+    init().
+
+init() ->
+    {ok, DbList} = db_list(),
+    case lists:member(?DB_NAME, DbList) of
+	true ->
+	    ok;
+	false ->
+	    db_create(?DB_NAME)
+    end,
+    init_views(views()).
+
+init_views([{Name, Map}|T]) ->
+    case view_get(?DB_NAME, Name) of
+	{error, not_found} ->
+	    view_create(?DB_NAME, Name, Map);
+	_ ->
+	    ok
+    end,
+    init_views(T);
+init_views([{Name, Map, Reduce}|T]) ->
+    case view_get(?DB_NAME, Name) of
+	{error, not_found} ->
+	    view_create(?DB_NAME, Name, Map, Reduce);
+	_ ->
+	    ok
+    end,
+    init_views(T);
+init_views([]) ->
+    ok.
+
+views() ->
+    [{?PROD_VIEW, product_view()}].
+
+product_view() ->
+    "function(doc) {"
+	"if(doc.type == 'product') {"
+	"emit(doc.id, doc); }}".
 
 stop() ->
     ok = application:stop(inets),

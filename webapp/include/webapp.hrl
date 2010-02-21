@@ -23,3 +23,6 @@
 
 -define(SUPPORTED_MEDIA, ["text/html","application/xml","text/plain",
 			  "application/xhtml+xml"]).
+
+-define(DB_NAME, webapp).
+-define(PROD_VIEW, products).

@@ -21,13 +21,19 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 top({_Req, _Path, ResContentType, get}) ->
     Body = products:get_products(ResContentType),
     {200, [{"Content-type", ResContentType}], Body};
-top({_Req, _Path, _ResContentType, post}) ->
-    ok;
+top({Req, _Path, ResContentType, post}) ->
+    Body = Req:parse_post(),
+    io:format("~p~n", [Body]),
+    {200, [{"Content-type", ResContentType}], "ok"};
 top({_Req, _Path, _ResContentType, put}) ->
     erlang:error(bad_method);
 top({_Req, _Path, _ResContentType, delete}) ->
     erlang:error(bad_method).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/productId
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 product({Req, _Path, _ResContentType, _Method}) ->
     UserPass = mochiweb_headers:get_value('Authorization', Req:get(headers)),
     case UserPass of
