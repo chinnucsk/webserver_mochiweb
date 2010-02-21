@@ -23,7 +23,7 @@ db() ->
     ?assertMatch({ok, _}, db:db_info(products)),
     ?assertMatch({ok, _}, db:db_info(cart)),
     ?assertMatch({ok, _}, db:db_info(user)),
-    ?assertEq({ok, [products,user,cart]}, db:db_list()).
+    ?assertEq({ok, [products,user,cart,webapp]}, db:db_list()).
         
 doc() ->
     ?assertEq(ok, db:doc_create(products, 1, product(10, 20))),
@@ -45,7 +45,8 @@ viewMap() ->
     viewMapNotStringKey(),
     viewMapOneValue(),
     viewMapOneValueWithoutName(),
-    viewMapComplexKey().
+    viewMapComplexKey(),
+    viewMapStringValue().
 
 viewMapNullKey() ->
     ?assertEq(ok, db:view_create(products, products, 
@@ -107,6 +108,21 @@ viewMapComplexKey() ->
     check_res12(Res12),
     ?assertEq(ok, db:view_delete(products, products)),
     ?assertEq({error, not_found}, db:view_delete(products, products)).
+
+viewMapStringValue() ->
+    ?assertEq(ok, db:doc_delete(products, 1)),
+    ?assertEq(ok, db:doc_delete(products, 2)),
+    ?assertEq(ok, db:doc_delete(products, 3)),
+    ?assertEq(ok, db:doc_create(products, 1, product2("poli", 50))),
+    ?assertEq(ok, db:doc_create(products, 2, product2("felix", 20))),
+    ?assertEq(ok, db:view_create(products, products, 
+				 "function(doc){emit(doc._id, "
+				 "{name: doc.name});}")),
+    {ok, Res14} = db:view_access(products, products),
+    check_res14(Res14),
+    {ok, Res15} = db:view_access(products, products, [{key, "1"}]),
+    check_res15(Res15),
+    ?assertEq(ok, db:view_delete(products, products)).
 
 
 check_res1(Res) ->
@@ -174,7 +190,19 @@ check_res13(Res) ->
     Expected = [[{amount, 10}, {price, 5}, {key, 5}]],
     ?assertEq(Expected, lists:sort(Res)).
 
+check_res14(Res) ->
+    Expected = [[{name, "felix"}, {key, 2}],
+		[{name, "poli"}, {key, 1}]],
+    ?assertEq(Expected, lists:sort(Res)).
+
+check_res15(Res) ->
+    Expected = [[{name, "poli"}, {key, 1}]],
+    ?assertEq(Expected, lists:sort(Res)).
     
 product(Price, Amount) ->
     [{"price", Price}, {"amount", Amount}].
+
+product2(Price, Amount) ->
+    [{"name", Price}, {"amount", Amount}].
+
 

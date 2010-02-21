@@ -52,7 +52,8 @@ views() ->
 product_view() ->
     "function(doc) {"
 	"if(doc.type == 'product') {"
-	"emit(doc.id, doc); }}".
+	"emit(doc.id, {name : doc.name, price : doc.price,"
+	"amount : doc.amount, description : doc.description}); }}".
 
 stop() ->
     ok = application:stop(inets),

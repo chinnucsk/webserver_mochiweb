@@ -19,12 +19,16 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 %% /products
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 top({_Req, _Path, ResContentType, get}) ->
-    Body = products:get_products(ResContentType),
-    {200, [{"Content-type", ResContentType}], Body};
+    {200, [{"Content-type", ResContentType}], ""};
 top({Req, _Path, ResContentType, post}) ->
     Body = Req:parse_post(),
-    io:format("~p~n", [Body]),
-    {200, [{"Content-type", ResContentType}], "ok"};
+    try 
+	product:create(Body),
+	{200, [{"Content-type", ResContentType}], "ok"}
+    catch
+	throw:bad_request ->
+	    {400, [{"Content-type", "text/plain"}], "Bad request"}
+    end;
 top({_Req, _Path, _ResContentType, put}) ->
     erlang:error(bad_method);
 top({_Req, _Path, _ResContentType, delete}) ->
@@ -34,12 +38,18 @@ top({_Req, _Path, _ResContentType, delete}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/productId
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-product({Req, _Path, _ResContentType, _Method}) ->
-    UserPass = mochiweb_headers:get_value('Authorization', Req:get(headers)),
-    case UserPass of
-	undefined ->
-	    {401, [{"Content-type", "text/html"},
-		   {"WWW-Authenticate", "Basic"}], ""};
-	_ ->
-	    {200, [{"Content-type", "text/html"}], "Logged in!!"}
-    end.
+product({_Req, [Path], ResContentType, get}) ->
+    try
+	Res = product:get_product(Path),
+	io:format("~p~n", [Res]),
+	{200, [{"Content-type", ResContentType}], "ok"}
+    catch
+	throw:bad_uri ->
+	    {404, [{"Content-type", "text/plain"}], "Not found"}
+    end;
+product({_Req, _Path, _ResContentType, post}) ->
+    ok;
+product({_Req, _Path, _ResContentType, put}) ->
+    ok;
+product({_Req, _Path, _ResContentType, delete}) ->
+    ok.
