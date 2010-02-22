@@ -30,9 +30,9 @@ top({Req, _Path, ResContentType, post}) ->
 	    {400, [{"Content-type", "text/plain"}], "Bad request"}
     end;
 top({_Req, _Path, _ResContentType, put}) ->
-    erlang:error(bad_method);
+    {405,[{"Content-type", "text/plain"}], "Bad method"};
 top({_Req, _Path, _ResContentType, delete}) ->
-    erlang:error(bad_method).
+    {405,[{"Content-type", "text/plain"}], "Bad method"}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,7 +40,7 @@ top({_Req, _Path, _ResContentType, delete}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 product({_Req, [Path], ResContentType, get}) ->
     try
-	Res = product:get_product(Path),
+	Res = product:get(Path),
 	io:format("~p~n", [Res]),
 	{200, [{"Content-type", ResContentType}], "ok"}
     catch
@@ -48,8 +48,21 @@ product({_Req, [Path], ResContentType, get}) ->
 	    {404, [{"Content-type", "text/plain"}], "Not found"}
     end;
 product({_Req, _Path, _ResContentType, post}) ->
-    ok;
-product({_Req, _Path, _ResContentType, put}) ->
-    ok;
-product({_Req, _Path, _ResContentType, delete}) ->
-    ok.
+    {405,[{"Content-type", "text/plain"}], "Bad method"};
+product({Req, [Path], ResContentType, put}) ->
+    Body = Req:parse_post(),
+    try
+	product:update(Path, Body),
+	{200, [{"Content-type", ResContentType}], "ok"}
+    catch
+	throw:bad_uri ->
+	    {404, [{"Content-type", "text/plain"}], "Not found"}
+    end;
+product({_Req, [Path], ResContentType, delete}) ->
+    try
+	product:delete(Path),
+	{200, [{"Content-type", ResContentType}], "ok"}
+    catch
+	throw:bad_uri ->
+	    {404, [{"Content-type", "text/plain"}], "Not found"}
+    end.

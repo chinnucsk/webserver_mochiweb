@@ -71,10 +71,8 @@ dispatch_request(Req) ->
 
 run_controller(Req, Controller, Args) ->
     case (catch erlang:apply(Controller, dispatch, [Args])) of
-	{'EXIT', {bad_uri,_}} ->
+	{'EXIT', _} ->
 	    Req:respond({404,[{"Content-type", "text/plain"}], "Not found"});
-	{'EXIT', {bad_method,_}} ->
-	    Req:respond({405,[{"Content-type", "text/plain"}], "Bad method"});
 	Res -> 
 	    Req:respond(Res)
     end.

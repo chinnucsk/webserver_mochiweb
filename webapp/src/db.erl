@@ -2,7 +2,8 @@
 
 -export([start/0, stop/0]).
 -export([db_create/1, db_delete/1, db_info/1, db_list/0]).
--export([doc_create/2, doc_create/3, doc_get/2, doc_get/3, doc_delete/2, doc_update/3]).
+-export([doc_create/2, doc_create/3, doc_get/2, doc_get/3, doc_delete/2, 
+	 doc_delete/3, doc_update/4]).
 -export([view_create/3, view_create/4, view_delete/2, view_get/2, view_get/3,
 	 view_get/4, view_access/2, view_access/3, view_access/4,
 	 view_access_c/3]).
@@ -51,9 +52,7 @@ views() ->
 
 product_view() ->
     "function(doc) {"
-	"if(doc.type == 'product') {"
-	"emit(doc.id, {name : doc.name, price : doc.price,"
-	"amount : doc.amount, description : doc.description}); }}".
+	"if(doc.type == 'product') {emit(doc.id, doc); }}".
 
 stop() ->
     ok = application:stop(inets),
@@ -102,7 +101,17 @@ doc_delete(DbName, DocName) ->
 	    Err
     end.
 
-doc_update(DbName, DocName, Content) ->
+doc_delete(DbName, ViewName, ObjectId) ->
+    case view_access(DbName, ViewName, [{key, ObjectId}], false) of
+	{ok, []} ->
+	    {error, bad_id};
+	{ok, [Res]} ->
+	    DocId = proplists:get_value('_id', Res),
+	    Rev = proplists:get_value('_rev', Res),
+	    do_call_bool(ecouch, doc_delete, [DbName, to_list(DocId), Rev])
+    end.
+
+doc_update(DbName, DocName, Content, false) ->
     case doc_get(DbName, DocName, false) of
 	{ok, Data} ->
 	    Rev = proplists:get_value('_rev', Data),
@@ -111,7 +120,11 @@ doc_update(DbName, DocName, Content) ->
 			  {obj, [{"_rev", Rev} | Content]}]);
 	Err ->
 	    Err
-    end.
+    end;
+doc_update(DbName, DocName, Content, true) ->
+    do_call_bool(ecouch, doc_update, 
+		 [DbName, to_list(DocName), {obj, Content}]).
+    
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
