@@ -11,19 +11,7 @@
 %% CREATE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 create(Params) ->
-    CheckedParams = utils:check_params(Params, ?FIELDS, [], create),
-    NewProduct = 
-	case db:view_access(?DB_NAME, ?PROD_VIEW, 
-			    [{limit, 1}, {descending, true}]) of
-	    {ok, []} ->
-		[{"type", product}, {"id", 1} | CheckedParams];
-	    {ok, [LastProduct]} ->
-		LastKey = proplists:get_value(key, LastProduct),
-		[{"type", product}, {"id", LastKey + 1} | CheckedParams];
-	    {error, _} ->
-		throw(db_error)
-	end,
-    db:doc_create(?DB_NAME, NewProduct).
+    crud:create(Params, ?FIELDS, ?PROD_VIEW, product).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,12 +20,7 @@ create(Params) ->
 get(Id) ->
     try list_to_integer(Id) of
 	Int ->
-	    case db:view_access(?DB_NAME, ?PROD_VIEW, [{key, Int}]) of
-		{ok, []} ->
-		    throw(bad_uri);
-		{ok, [Res]} ->
-		    Res
-	    end
+	    crud:get(Id, ?PROD_VIEW)
     catch
 	error:badarg ->
 	    throw(bad_uri)
@@ -50,12 +33,7 @@ get(Id) ->
 delete(Id) ->
     try list_to_integer(Id) of
 	Int ->
-	    case db:doc_delete(?DB_NAME, ?PROD_VIEW, Int) of
-		{error, bad_id} ->
-		    throw(bad_uri);
-		ok ->
-		    ok
-	    end
+	    crud:delete(Int, ?PROD_VIEW)
     catch
 	error:badarg ->
 	    throw(bad_uri)
@@ -66,24 +44,17 @@ delete(Id) ->
 %% UPDATE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 update(Id, Params) ->
-    CheckedParams = utils:check_params(Params, ?FIELDS, [], update),
     try list_to_integer(Id) of
 	Int ->
-	    case db:view_access(?DB_NAME, ?PROD_VIEW, [{key, Int}], false) of
-		{ok, []} ->
-		    throw(bad_uri);
-		{ok, [Res]} ->
-		    UpdatedProduct = merge(CheckedParams, Res),
-		    DocId = proplists:get_value('_id', UpdatedProduct),
-		    db:doc_update(?DB_NAME, DocId, UpdatedProduct, true)		    
-	    end
+	    crud:update(Int, Params, ?FIELDS, ?PROD_VIEW)
     catch
 	error:badarg ->
 	    throw(bad_uri)
     end.
 
-merge([{K,V}|T], Params) ->
-    KAtom = list_to_atom(K),
-    merge(T, [{KAtom,V} | proplists:delete(KAtom, Params)]);
-merge([], Params) ->
-    proplists:delete(key, Params).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GET LIST
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_list() ->
+    db:view_access(?DB_NAME, ?PROD_VIEW, [{limit,10},{descending,true}]).
