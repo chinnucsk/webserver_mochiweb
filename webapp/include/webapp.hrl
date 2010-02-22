@@ -22,7 +22,9 @@
 	 id}).
 
 -define(SUPPORTED_MEDIA, ["text/html","application/xml","text/plain",
-			  "application/xhtml+xml"]).
+			  "application/xhtml+xml", "application/json"]).
+
+-define(CT, "Content-type").
 
 -define(DB_NAME, webapp).
 -define(PROD_VIEW, products).

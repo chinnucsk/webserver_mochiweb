@@ -19,20 +19,20 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 %% /products
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 top({_Req, _Path, ResContentType, get}) ->
-    {200, [{"Content-type", ResContentType}], ""};
+    {200, [{?CT, ResContentType}], ""};
 top({Req, _Path, ResContentType, post}) ->
     Body = Req:parse_post(),
     try 
 	product:create(Body),
-	{200, [{"Content-type", ResContentType}], "ok"}
+	{200, [{?CT, ResContentType}], "ok"}
     catch
 	throw:bad_request ->
-	    {400, [{"Content-type", "text/plain"}], "Bad request"}
+	    {400, [{?CT, "text/plain"}], "Bad request"}
     end;
 top({_Req, _Path, _ResContentType, put}) ->
-    {405,[{"Content-type", "text/plain"}], "Bad method"};
+    {405,[{?CT, "text/plain"}], "Bad method"};
 top({_Req, _Path, _ResContentType, delete}) ->
-    {405,[{"Content-type", "text/plain"}], "Bad method"}.
+    {405,[{?CT, "text/plain"}], "Bad method"}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,29 +40,29 @@ top({_Req, _Path, _ResContentType, delete}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 product({_Req, [Path], ResContentType, get}) ->
     try
-	Res = product:get(Path),
-	io:format("~p~n", [Res]),
-	{200, [{"Content-type", ResContentType}], "ok"}
+	Data = product:get(Path),
+	Response = product_render:get(Data, ResContentType),
+	{200, [{?CT, ResContentType}], Response}
     catch
 	throw:bad_uri ->
-	    {404, [{"Content-type", "text/plain"}], "Not found"}
+	    {404, [{?CT, "text/plain"}], "Not found"}
     end;
 product({_Req, _Path, _ResContentType, post}) ->
-    {405,[{"Content-type", "text/plain"}], "Bad method"};
+    {405,[{?CT, "text/plain"}], "Bad method"};
 product({Req, [Path], ResContentType, put}) ->
     Body = Req:parse_post(),
     try
 	product:update(Path, Body),
-	{200, [{"Content-type", ResContentType}], "ok"}
+	{200, [{?CT, ResContentType}], "ok"}
     catch
 	throw:bad_uri ->
-	    {404, [{"Content-type", "text/plain"}], "Not found"}
+	    {404, [{?CT, "text/plain"}], "Not found"}
     end;
 product({_Req, [Path], ResContentType, delete}) ->
     try
 	product:delete(Path),
-	{200, [{"Content-type", ResContentType}], "ok"}
+	{200, [{?CT, ResContentType}], "ok"}
     catch
 	throw:bad_uri ->
-	    {404, [{"Content-type", "text/plain"}], "Not found"}
+	    {404, [{?CT, "text/plain"}], "Not found"}
     end.

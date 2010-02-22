@@ -1,5 +1,5 @@
 -module(product).
--export([create/1, get/1, delete/1, update/2]).
+-export([create/1, get/1, delete/1, update/2, get_list/0]).
 
 -include("webapp.hrl").
 
@@ -20,7 +20,7 @@ create(Params) ->
 get(Id) ->
     try list_to_integer(Id) of
 	Int ->
-	    crud:get(Id, ?PROD_VIEW)
+	    crud:get(Int, ?PROD_VIEW)
     catch
 	error:badarg ->
 	    throw(bad_uri)

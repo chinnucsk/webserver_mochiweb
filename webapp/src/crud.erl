@@ -2,6 +2,8 @@
 
 -export([create/4, get/2, delete/2, update/4]).
 
+-include("webapp.hrl").
+
 create(UserParams, ExpectedFields, ViewName, Type) ->
     CheckedParams = utils:check_params(UserParams, ExpectedFields, [], create),
     NewObject = 
