@@ -28,3 +28,5 @@
 
 -define(DB_NAME, webapp).
 -define(PROD_VIEW, products).
+
+-define(HOSTNAME, "http://localhost:8000/").

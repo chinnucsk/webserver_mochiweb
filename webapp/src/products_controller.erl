@@ -18,13 +18,21 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-top({_Req, _Path, ResContentType, get}) ->
-    {200, [{?CT, ResContentType}], ""};
+top({Req, _Path, ResContentType, get}) ->
+    QueryString = Req:parse_qs(),
+    try
+	Data = product:get_list(QueryString),
+	Response = product_render:get_list(Data, ResContentType),
+	{200, [{?CT, ResContentType}], Response}
+    catch
+	throw:bad_request ->
+	    {400, [{?CT, "text/plain"}], "Bad request"}
+    end;    
 top({Req, _Path, ResContentType, post}) ->
     Body = Req:parse_post(),
     try 
 	product:create(Body),
-	{200, [{?CT, ResContentType}], "ok"}
+	{201, [{?CT, ResContentType}], "ok"}
     catch
 	throw:bad_request ->
 	    {400, [{?CT, "text/plain"}], "Bad request"}
@@ -56,7 +64,9 @@ product({Req, [Path], ResContentType, put}) ->
 	{200, [{?CT, ResContentType}], "ok"}
     catch
 	throw:bad_uri ->
-	    {404, [{?CT, "text/plain"}], "Not found"}
+	    {404, [{?CT, "text/plain"}], "Not found"};
+	throw:bad_request ->
+	    {400, [{?CT, "text/plain"}], "Bad request"}
     end;
 product({_Req, [Path], ResContentType, delete}) ->
     try

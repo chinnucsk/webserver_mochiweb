@@ -1,9 +1,9 @@
 -module(product).
--export([create/1, get/1, delete/1, update/2, get_list/0]).
+-export([create/1, get/1, delete/1, update/2, get_list/1]).
 
 -include("webapp.hrl").
 
--define(FIELDS, [{"name",string}, {"price",int}, 
+-define(FIELDS, [{"name",string}, {"price",int},
 		 {"amount",int}, {"description",string}]).
 
 
@@ -56,5 +56,51 @@ update(Id, Params) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GET LIST
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-get_list() ->
-    db:view_access(?DB_NAME, ?PROD_VIEW, [{limit,10},{descending,true}]).
+get_list([]) ->
+    io:format("no params~n"),
+    {ok, Res} = 
+	db:view_access(?DB_NAME, ?PROD_VIEW, [{limit,10},{descending,true}]),
+    Res;
+get_list(QueryString) ->
+    io:format("params: ~p~n", [QueryString]),
+    {Options,_} = build_options(QueryString, {[],[]}),
+    io:format("Options: ~p~n", [Options]),
+    {ok, Res} = db:view_access(?DB_NAME, ?PROD_VIEW, Options),
+    Res.
+
+build_options([{"id_gt", Value}|T], {Options, AfterCriteria}) ->
+    try list_to_integer(Value) of
+	Int ->
+	    build_options(T, {[{startkey, Int+1}|Options], AfterCriteria})
+    catch
+	error:badarg ->
+	    throw(bad_request)
+    end;
+build_options([{"id_lt", Value}|T], {Options, AfterCriteria}) ->
+    try list_to_integer(Value) of
+	Int ->
+	    build_options(T, {[{endkey, Int-1}|Options], AfterCriteria})
+    catch
+	error:badarg ->
+	    throw(bad_request)
+    end;
+build_options([{"limit", Value}|T], {Options, AfterCriteria}) ->
+    try list_to_integer(Value) of
+	Int ->
+	    build_options(T, {[{limit, Int}|Options], AfterCriteria})
+    catch
+	error:badarg ->
+	    throw(bad_request)
+    end;
+build_options([{"name", _Value}=Pair|T], {Options, AfterCriteria}) ->
+    build_options(T, {Options, [Pair|AfterCriteria]});
+build_options([{"amount_gt", _Value}=Pair|T], {Options, AfterCriteria}) ->
+    build_options(T, {Options, [Pair|AfterCriteria]});
+build_options([{"price_gt", _Value}=Pair|T], {Options, AfterCriteria}) ->
+    build_options(T, {Options, [Pair|AfterCriteria]});
+build_options([{"price_lt", _Value}=Pair|T], {Options, AfterCriteria}) ->
+    build_options(T, {Options, [Pair|AfterCriteria]});
+build_options([], Acc) ->
+    Acc;
+build_options(_, _) ->
+    throw(bad_request).
