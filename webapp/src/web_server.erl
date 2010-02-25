@@ -62,6 +62,16 @@ dispatch_request(Req) ->
     case Path of
 	"/favicon.ico" ->
 	    Req:respond({200, [{"Content-Type", "text/html"}], ""});
+	"/style.css" ->
+	    Req:serve_file("style.css", "priv/");
+	"/images/img01.jpg" ->
+	    Req:serve_file("img01.jpg", "priv/images/");
+	"/images/img02.jpg" ->
+	    Req:serve_file("img02.jpg", "priv/images/");
+	"/images/img03.gif" ->
+	    Req:serve_file("img03.gif", "priv/images/");
+	"/images/spacer.gif" ->
+	    Req:serve_file("spacer.gif", "priv/images/");
 	_ ->
 	    {Controller, ControllerPath} = parse_path(Path),
 	    Meth = clean_method(Req:get(method)),
