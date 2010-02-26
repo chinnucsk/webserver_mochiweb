@@ -1,5 +1,5 @@
 -module(products_controller).
--export([dispatch/1, top/1, product/1]).
+-export([dispatch/1, top/1, product/1, new/1]).
 
 -include_lib("webapp.hrl").
 
@@ -7,6 +7,8 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
     F = case Path of
 	    "" ->
 		top;
+	    ["new"] ->
+		new;
 	    [_] ->
 		product;
 	    _ ->
@@ -30,6 +32,7 @@ top({Req, _Path, ResContentType, get}) ->
     end;    
 top({Req, _Path, ResContentType, post}) ->
     Body = Req:parse_post(),
+    io:format("~p~n", [Body]),
     try 
 	product:create(Body),
 	{201, [{?CT, ResContentType}], "ok"}
@@ -76,3 +79,17 @@ product({_Req, [Path], ResContentType, delete}) ->
 	throw:bad_uri ->
 	    {404, [{?CT, "text/plain"}], "Not found"}
     end.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/new
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+new({_Req, [_Path], ResContentType, get}) ->
+    Response = product_render:new(ResContentType),
+    {200, [{?CT, ResContentType}], Response};
+new({_Req, _Path, _ResContentType, post}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+new({_Req, [_Path], _ResContentType, put}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+new({_Req, [_Path], _ResContentType, delete}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"}.

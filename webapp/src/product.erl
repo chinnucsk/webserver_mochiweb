@@ -3,8 +3,8 @@
 
 -include("webapp.hrl").
 
--define(FIELDS, [{"name",string}, {"price",int},
-		 {"amount",int}, {"description",string}]).
+-define(FIELDS, [{"name",string}, {"price",int}, {"amount",int}, 
+		 {"description",string}, {"tag",string}]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

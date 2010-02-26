@@ -1,9 +1,13 @@
 -module(product_render).
 
--export([get/2, get_list/2]).
+-export([get/2, get_list/2, new/1]).
 
 -include_lib("webapp.hrl").
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/productId
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 get(Data, "application/xml") ->
     {ok, Compiled} = sgte:compile_file("priv/template.xml"),
     {ok, Compiled2} = sgte:compile("\n<$field$>$value$</$field$>"),
@@ -40,6 +44,9 @@ get(Data, "application/json") ->
     mochijson2:encode({struct, Data}).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 get_list(Data, "application/xml") ->
     {ok, Compiled} = sgte:compile_file("priv/template.xml"),
     {ok, Compiled2} = sgte:compile_file("\n<product><link>$link$</link>"
@@ -57,8 +64,8 @@ get_list(Data, "application/xml") ->
 			       {attrs, List}]);
 get_list(Data, "text/html") ->
     {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
-    {ok, CompiledBody} = sgte:compile_file("priv/template_list.html"),
-    {ok, CompiledList} = sgte:compile("<li><a href=\"$link$ \">$name$</a></li>"),
+    {ok, CompiledElem} = sgte:compile_file("priv/template_list_element.html"),
+    {ok, CompiledBody} = sgte:compile("$map element elems$ "),
     List = lists:foldl(
 	     fun(Product, Acc) ->
 		     Id = proplists:get_value(key, Product),
@@ -68,10 +75,10 @@ get_list(Data, "text/html") ->
 	     end,
 	     [],
 	     Data),
-    RenderedBody = sgte:render(CompiledBody, [{li, CompiledList},
-					      {links, List}]),    
-    sgte:render_str(CompiledTemplate, [{title, "List of products"},
-				       {summary, "blabla"},
+    RenderedBody = sgte:render(CompiledBody, [{element, CompiledElem},
+					      {elems, List}]),    
+    sgte:render_str(CompiledTemplate, [{title, "products"},
+				       {summary, ""},
 				       {body, RenderedBody}]);
 get_list(Data, "application/json") ->
     NewData = 
@@ -85,3 +92,17 @@ get_list(Data, "application/json") ->
 	  [],
 	  Data),
     mochijson2:encode(NewData).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/new
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+new("application/xml") ->
+    "ok";
+new("text/html") ->
+    {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
+    {ok, CompiledBody} = sgte:compile_file("priv/product_new.html"),
+    RenderedBody = sgte:render(CompiledBody, []),    
+    sgte:render_str(CompiledTemplate, [{title, "new product"},
+				       {summary, ""},
+				       {body, RenderedBody}]).

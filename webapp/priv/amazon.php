@@ -7,6 +7,7 @@ $pxml = aws_signed_request("com",
 			   array("Operation"=>"ItemSearch",
 				 "SearchIndex"=>"Books",
 				 "Author" => "larsson",
-				 "ResponseGroup"=>"Small, ItemAttributes"), 
+				 "ResponseGroup"=>"Images"), 
 			   $public_key, $private_key);
+print "$pxml";
 ?>

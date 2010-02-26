@@ -64,14 +64,8 @@ dispatch_request(Req) ->
 	    Req:respond({200, [{"Content-Type", "text/html"}], ""});
 	"/style.css" ->
 	    Req:serve_file("style.css", "priv/");
-	"/images/img01.jpg" ->
-	    Req:serve_file("img01.jpg", "priv/images/");
-	"/images/img02.jpg" ->
-	    Req:serve_file("img02.jpg", "priv/images/");
-	"/images/img03.gif" ->
-	    Req:serve_file("img03.gif", "priv/images/");
-	"/images/spacer.gif" ->
-	    Req:serve_file("spacer.gif", "priv/images/");
+	"/images/" ++ Img ->
+	    Req:serve_file(Img, "priv/images/");
 	_ ->
 	    {Controller, ControllerPath} = parse_path(Path),
 	    Meth = clean_method(Req:get(method)),
