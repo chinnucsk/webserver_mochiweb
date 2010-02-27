@@ -78,7 +78,8 @@ product({Req, [Path], ResContentType, put}) ->
 product({_Req, [Path], ResContentType, delete}) ->
     try
 	product:delete(Path),
-	{200, [{?CT, ResContentType}], "ok"}
+	Response = product_render:delete(ResContentType),
+	{200, [{?CT, ResContentType}], Response}
     catch
 	throw:bad_uri ->
 	    {404, [{?CT, "text/plain"}], "Not found"}

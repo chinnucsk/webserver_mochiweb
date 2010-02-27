@@ -1,6 +1,6 @@
 -module(product_render).
 
--export([get/2, get_list/2, create/1, new/1, search/1, edit/2]).
+-export([get/2, get_list/2, create/1, new/1, search/1, edit/2, delete/1]).
 
 -include_lib("webapp.hrl").
 
@@ -8,11 +8,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/productId
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-create("applicatiogn/xml") ->
+create("application/xml") ->
     "ok";
 create("text/html") ->
     "<html>ok</html>";
 create("application/json") ->
+    mochijson2:encode({struct,[{ok,true}]}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/productId delete
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+delete("application/xml") ->
+    "ok";
+delete("text/html") ->
+    "<html>ok</html>";
+delete("application/json") ->
     mochijson2:encode({struct,[{ok,true}]}).
 
 

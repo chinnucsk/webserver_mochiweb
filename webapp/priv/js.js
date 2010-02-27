@@ -18,7 +18,9 @@ $(document).ready(function() {
        data: $(this).serialize(),
        success:
 	 function(data) {
+	   alert(data);
 	   if(data["ok"] == true) {
+	     alert("soma");
 	     window.location.replace("/products");
 	   } else {
 	     alert("The parameters provided are not correct");
@@ -47,5 +49,27 @@ $(document).ready(function() {
     return false;
   });
 
-		    
+
+  //Delete a product
+  $("#delete").click(function() {
+    $.ajax({
+      type: "delete",
+      url: $(this).attr("href"),
+      dataType: "json",
+      success: function(data) {
+	if(data["ok"] == true) {
+	  window.location.replace("/products");
+	} else {
+	  alert("An error occurred");
+	}
+      },
+      error: function(xhr, textStatus, errorThrown) {
+	alert("Oooops! Request failed with status: " +
+	      xhr.status + " " + xhr.reponseText);
+      }
+    });
+    return false;
+  });
+
+
 });
