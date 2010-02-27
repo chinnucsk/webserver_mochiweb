@@ -26,20 +26,23 @@ get(Data, "application/xml") ->
 					 {value,Description}]]}]);
 get(Data, "text/html") ->
     {ok, Compiled} = sgte:compile_file("priv/template.html"),
-    {ok, Compiled2} = sgte:compile("priv/template_list.html"),
-    Id = proplists:get_value(key, Data),
-    Name = proplists:get_value(name, Data),
-    Price = proplists:get_value(price, Data),
-    Amount = proplists:get_value(amount, Data),
-    Description = proplists:get_value(description, Data),
-    sgte:render_str(Compiled, [{type, "product"},
-			       {attr, Compiled2}, 
-			       {attrs, [[{field,id},{value,Id}],
-					[{field,name},{value,Name}],
-					[{field,price},{value,Price}],
-					[{field,amount},{value,Amount}],
-					[{field,description},
-					 {value,Description}]]}]);
+    {ok, CompiledElem} = sgte:compile_file("priv/template_resource_field.html"),
+    {ok, CompiledBody} = sgte:compile_file("priv/template_resource.html"),
+    {ok, CompiledMenu} = sgte:compile("<li><a href=\"$link$ \">$name$ </a></li>"),
+    {List,Data} = lists:foldr(
+	     fun(E, {Acc, PL}) ->
+		     {[[{field, E}, {value, proplists:get_value(E,PL)}] | Acc], 
+		      PL}
+	     end,
+	     {[],Data},
+	     [name, tag, price, amount, description]),
+    RenderedBody = sgte:render(CompiledBody, [{element,CompiledElem},
+					      {elems, List}]),
+    sgte:render_str(Compiled, 
+		    [{title, "product"}, {body, RenderedBody}, 
+		     {menu, CompiledMenu},
+		     {elems, [[{link, "/products/new"}, {name,"New"}],
+			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get(Data, "application/json") ->
     mochijson2:encode({struct, Data}).
 
@@ -65,7 +68,8 @@ get_list(Data, "application/xml") ->
 get_list(Data, "text/html") ->
     {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
     {ok, CompiledElem} = sgte:compile_file("priv/template_list_element.html"),
-    {ok, CompiledBody} = sgte:compile("$map element elems$ "),
+    {ok, CompiledBody} = sgte:compile_file("priv/template_list.html"),
+    {ok, CompiledMenu} = sgte:compile("<li><a href=\"$link$ \">$name$ </a></li>"),
     List = lists:foldl(
 	     fun(Product, Acc) ->
 		     Id = proplists:get_value(key, Product),
@@ -77,9 +81,11 @@ get_list(Data, "text/html") ->
 	     Data),
     RenderedBody = sgte:render(CompiledBody, [{element, CompiledElem},
 					      {elems, List}]),    
-    sgte:render_str(CompiledTemplate, [{title, "products"},
-				       {summary, ""},
-				       {body, RenderedBody}]);
+    sgte:render_str(CompiledTemplate, 
+		    [{title, "products"}, {body, RenderedBody},  
+		     {menu, CompiledMenu},
+		     {elems, [[{link, "/products/new"}, {name,"New"}],
+			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get_list(Data, "application/json") ->
     NewData = 
 	lists:foldl(
@@ -103,6 +109,5 @@ new("text/html") ->
     {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
     {ok, CompiledBody} = sgte:compile_file("priv/product_new.html"),
     RenderedBody = sgte:render(CompiledBody, []),    
-    sgte:render_str(CompiledTemplate, [{title, "new product"},
-				       {summary, ""},
+    sgte:render_str(CompiledTemplate, [{title, "new product"}, 
 				       {body, RenderedBody}]).

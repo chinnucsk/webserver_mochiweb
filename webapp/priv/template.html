@@ -25,7 +25,6 @@
     <div id="content">
       <div class="post">
 	<h2 class="title"><a>$title$</a></h2>
-	<p class="meta">$summary$</p>
 	$include body$
       </div>
     </div>
@@ -34,7 +33,7 @@
 	<li>
 	  <h2>Menu</h2>
 	  <ul>
-	    <li><a href="/products">Products</a></li>
+	    $map menu elems$
 	  </ul>
 	</li>
       </ul>

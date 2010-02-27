@@ -305,6 +305,17 @@ hr { display: none; }
     background:url(images/button.jpg) no-repeat 0px -23px;
 }
 
+.post .entry .field {
+    color:#555555;
+    font-weight: bold;
+    font-size:15px;
+}
+
+.post .entry .value {
+    color:#555555;
+    font-size:15px;
+}
+
 .post .links {
 	background: #90BF35;
 	border: 1px solid #5F817E;
