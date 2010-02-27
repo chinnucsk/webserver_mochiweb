@@ -32,10 +32,10 @@ top({Req, _Path, ResContentType, get}) ->
     end;    
 top({Req, _Path, ResContentType, post}) ->
     Body = Req:parse_post(),
-    io:format("~p~n", [Body]),
     try 
 	product:create(Body),
-	{201, [{?CT, ResContentType}], "ok"}
+	Response = product_render:create(ResContentType),
+	{201, [{?CT, ResContentType}], Response}
     catch
 	throw:bad_request ->
 	    {400, [{?CT, "text/plain"}], "Bad request"}

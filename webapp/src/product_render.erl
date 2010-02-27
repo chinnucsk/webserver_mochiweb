@@ -1,9 +1,19 @@
 -module(product_render).
 
--export([get/2, get_list/2, new/1]).
+-export([get/2, get_list/2, create/1, new/1]).
 
 -include_lib("webapp.hrl").
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/productId
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+create("applicatiogn/xml") ->
+    "ok";
+create("text/html") ->
+    "<html>ok</html>";
+create("application/json") ->
+    mochijson2:encode({struct,[{ok,true}]}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/productId
