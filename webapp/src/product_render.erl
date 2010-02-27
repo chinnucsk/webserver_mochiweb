@@ -1,6 +1,6 @@
 -module(product_render).
 
--export([get/2, get_list/2, create/1, new/1]).
+-export([get/2, get_list/2, create/1, new/1, search/1]).
 
 -include_lib("webapp.hrl").
 
@@ -14,6 +14,7 @@ create("text/html") ->
     "<html>ok</html>";
 create("application/json") ->
     mochijson2:encode({struct,[{ok,true}]}).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/productId
@@ -133,3 +134,22 @@ new("text/html") ->
 		     {active3, ""}, {active4, ""},  
 		     {action, "/products"}, {id, "id"},
 		     {elems, [[{link, "/products/search"}, {name,"Search"}]]}]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/search
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+search("application/xml") ->
+    "ok";
+search("text/html") ->
+    {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
+    {ok, CompiledBody} = sgte:compile_file("priv/product_search.html"),
+    {ok, CompiledMenu} = sgte:compile_file("priv/template_menu.html"),
+    RenderedBody = sgte:render(CompiledBody, []),    
+    sgte:render_str(CompiledTemplate, 
+		    [{title, "search products"}, {body, RenderedBody},
+		     {menu, CompiledMenu},
+		     {active1, ""}, {active2, "class=\"current_page_item\""},
+		     {active3, ""}, {active4, ""},  
+		     {action, "/products"}, {id, "id"},
+		     {elems, [[{link, "/products/new"}, {name,"New"}]]}]).

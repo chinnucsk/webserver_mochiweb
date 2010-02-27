@@ -1,15 +1,19 @@
 $(document).ready(function() {
+
+  //Tweak for the quick search form
   $("#search-submit").click(function() {
     var id = $("#search-text").val();
     window.location.replace("/products/" + id);
     return false;
   });
 
+  //Tweak for the new resource form, so that we can ask for JSON back
+  //and redirect to /products if it went OK
   $("#new_form").submit(function() {
     var action = $(this).attr("action");
     $.ajax(
       {type: "POST",
-      url: action,
+       url: action,
        dataType: "json",
        data: $(this).serialize(),
        success:
@@ -26,4 +30,22 @@ $(document).ready(function() {
       });
     return false;
   });
+
+  //Disable empty fields in the search formso that they don't appear in the URI
+  $("#search_form").submit(function() {
+    //TODO: check params
+    $(":input", this).each(function() {
+      if(this.value == "") $(this).attr("disabled", "disabled");
+    });
+    $(this).submit();
+  });
+
+
+  //Create a new window when clicking a link in a list of resources
+  $(".link").click(function() {
+    window.open(this.href);
+    return false;
+  });
+
+		    
 });

@@ -1,5 +1,5 @@
 -module(products_controller).
--export([dispatch/1, top/1, product/1, new/1]).
+-export([dispatch/1, top/1, product/1, new/1, search/1]).
 
 -include_lib("webapp.hrl").
 
@@ -9,6 +9,8 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 		top;
 	    ["new"] ->
 		new;
+	    ["search"] ->
+		search;
 	    [_] ->
 		product;
 	    _ ->
@@ -93,3 +95,19 @@ new({_Req, [_Path], _ResContentType, put}) ->
     {405,[{?CT, "text/plain"}], "Bad method"};
 new({_Req, [_Path], _ResContentType, delete}) ->
     {405,[{?CT, "text/plain"}], "Bad method"}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/search
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+search({_Req, [_Path], ResContentType, get}) ->
+    io:format("soma"),
+    Response = product_render:search(ResContentType),
+    {200, [{?CT, ResContentType}], Response};
+search({_Req, _Path, _ResContentType, post}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+search({_Req, [_Path], _ResContentType, put}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+search({_Req, [_Path], _ResContentType, delete}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"}.
+
