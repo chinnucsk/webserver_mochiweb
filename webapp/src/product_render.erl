@@ -1,6 +1,6 @@
 -module(product_render).
 
--export([get/2, get_list/2, create/1, new/1, search/1]).
+-export([get/2, get_list/2, create/1, new/1, search/1, edit/2]).
 
 -include_lib("webapp.hrl").
 
@@ -47,8 +47,9 @@ get(Data, "text/html") ->
 	     end,
 	     {[],Data},
 	     [name, tag, price, amount, description]),
+    Id = proplists:get_value(id, Data),
     RenderedBody = sgte:render(CompiledBody, [{element,CompiledElem},
-					      {elems, List}]),
+					      {elems, List},{id,Id}]),
     sgte:render_str(Compiled, 
 		    [{title, "product"}, {body, RenderedBody}, 
 		     {menu, CompiledMenu},
@@ -120,8 +121,6 @@ get_list(Data, "application/json") ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/new
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-new("application/xml") ->
-    "ok";
 new("text/html") ->
     {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
     {ok, CompiledBody} = sgte:compile_file("priv/product_new.html"),
@@ -139,8 +138,6 @@ new("text/html") ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% /products/search
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-search("application/xml") ->
-    "ok";
 search("text/html") ->
     {ok, CompiledTemplate} = sgte:compile_file("priv/template.html"),
     {ok, CompiledBody} = sgte:compile_file("priv/product_search.html"),
@@ -153,3 +150,27 @@ search("text/html") ->
 		     {active3, ""}, {active4, ""},  
 		     {action, "/products"}, {id, "id"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}]]}]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/4/edit
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+edit(Data, "text/html") ->
+    {ok, Compiled} = sgte:compile_file("priv/template.html"),
+    {ok, CompiledBody} = sgte:compile_file("priv/template_product_edit.html"),
+    {ok, CompiledMenu} = sgte:compile_file("priv/template_menu.html"),
+    {List,Data} = lists:foldr(
+	     fun(E, {Acc, PL}) ->
+		     {[{E, proplists:get_value(E,PL)} | Acc], PL}
+	     end,
+	     {[],Data},
+	     [name, tag, price, amount, description]),
+    RenderedBody = sgte:render(CompiledBody, List),
+    sgte:render_str(Compiled, 
+		    [{title, "product"}, {body, RenderedBody}, 
+		     {menu, CompiledMenu},
+		     {active1, ""}, {active2, "class=\"current_page_item\""},
+		     {active3, ""}, {active4, ""},  
+		     {action, "/products"}, {id, "id"},
+		     {elems, [[{link, "/products/new"}, {name,"New"}],
+			      [{link, "/products/search"}, {name,"Search"}]]}]).

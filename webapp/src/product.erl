@@ -62,7 +62,6 @@ get_list([]) ->
     Res;
 get_list(QueryString) ->
     {Options, AfterCriteria} = build_options(QueryString, {[],[]}),
-    io:format("~p~n~p~n", [Options, AfterCriteria]),
     case AfterCriteria of
 	[] ->
 	    {ok, Res} = db:view_access(?DB_NAME, ?PROD_VIEW, Options),
@@ -75,7 +74,6 @@ get_list(QueryString) ->
 		    Limit ->
 			{proplists:delete(limit, Options), Limit}
 		end,
-	    io:format("~p~n~p~n", [NOptions, AfterLimit]),
 	    {ok, PartialRes} = db:view_access(?DB_NAME, ?PROD_VIEW, NOptions),
 	    filter_after_criteria(PartialRes, AfterCriteria, AfterLimit, [])
     end.

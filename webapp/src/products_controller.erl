@@ -1,5 +1,5 @@
 -module(products_controller).
--export([dispatch/1, top/1, product/1, new/1, search/1]).
+-export([dispatch/1, top/1, product/1, new/1, search/1, edit/1]).
 
 -include_lib("webapp.hrl").
 
@@ -13,6 +13,8 @@ dispatch({_Req, Path, _ResContentType, _Meth} = Args) ->
 		search;
 	    [_] ->
 		product;
+	    [_,"edit"] ->
+		edit;
 	    _ ->
 		erlang:error(bad_uri)
 	end,
@@ -87,8 +89,13 @@ product({_Req, [Path], ResContentType, delete}) ->
 %% /products/new
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 new({_Req, [_Path], ResContentType, get}) ->
-    Response = product_render:new(ResContentType),
-    {200, [{?CT, ResContentType}], Response};
+    try
+	Response = product_render:new(ResContentType),
+	{200, [{?CT, ResContentType}], Response}
+    catch
+	error:function_clause ->
+	    {406, [{?CT, "text/plain"}], "Not acceptable"}
+    end;
 new({_Req, _Path, _ResContentType, post}) ->
     {405,[{?CT, "text/plain"}], "Bad method"};
 new({_Req, [_Path], _ResContentType, put}) ->
@@ -101,13 +108,39 @@ new({_Req, [_Path], _ResContentType, delete}) ->
 %% /products/search
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 search({_Req, [_Path], ResContentType, get}) ->
-    io:format("soma"),
-    Response = product_render:search(ResContentType),
-    {200, [{?CT, ResContentType}], Response};
+    try
+	Response = product_render:search(ResContentType),
+	{200, [{?CT, ResContentType}], Response}
+    catch
+	error:function_clause ->
+	    {406, [{?CT, "text/plain"}], "Not acceptable"}
+    end;
 search({_Req, _Path, _ResContentType, post}) ->
     {405,[{?CT, "text/plain"}], "Bad method"};
 search({_Req, [_Path], _ResContentType, put}) ->
     {405,[{?CT, "text/plain"}], "Bad method"};
 search({_Req, [_Path], _ResContentType, delete}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/3/edit
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+edit({_Req, [Id,"edit"], ResContentType, get}) ->
+    try
+	Data = product:get(Id),
+	Response = product_render:edit(Data, ResContentType),
+	{200, [{?CT, ResContentType}], Response}
+    catch
+	throw:bad_uri ->
+	    {404, [{?CT, "text/plain"}], "Not found"};
+	error:function_clause ->
+	    {406, [{?CT, "text/plain"}], "Not acceptable"}
+    end;
+edit({_Req, _Path, _ResContentType, post}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+edit({_Req, [_Path], _ResContentType, put}) ->
+    {405,[{?CT, "text/plain"}], "Bad method"};
+edit({_Req, [_Path], _ResContentType, delete}) ->
     {405,[{?CT, "text/plain"}], "Bad method"}.
 

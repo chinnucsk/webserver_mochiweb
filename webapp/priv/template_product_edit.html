@@ -1,0 +1,27 @@
+<div class="entry">
+  <form id="update_form" class="form" method="post" action="/products">
+    <p>
+      <input type="text" name="name" id="name" value="$name$"/>
+      <label for="name">Name</label>
+    </p>
+    <p>
+      <input type="text" name="tag" id="tag" value="$tag$"/>
+      <label for="tag">Tag</label>
+    </p>
+    <p>
+      <input type="text" name="amount" id="amount" value="$amount$"/>
+      <label for="amount">Amount</label>
+    </p>
+    <p>
+      <input type="text" name="price" id="price" value="$price$"/>
+      <label for="price">Price</label>
+    </p>
+    <p>
+      <textarea name="description">$description$</textarea>
+    </p>
+    <br/>
+    <p>
+      <input type="submit" value="Update" />
+    </p>
+  </form>
+</div>
