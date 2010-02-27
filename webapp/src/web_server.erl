@@ -68,6 +68,8 @@ dispatch_request(Req) ->
 	    Req:serve_file(Img, "priv/images/");
 	"/" ->
 	    Req:serve_file("index.html", "priv/");
+	"/js.js" ->
+	    Req:serve_file("js.js", "priv/");
 	_ ->
 	    {Controller, ControllerPath} = parse_path(Path),
 	    Meth = clean_method(Req:get(method)),

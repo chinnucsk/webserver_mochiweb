@@ -41,6 +41,9 @@ get(Data, "text/html") ->
     sgte:render_str(Compiled, 
 		    [{title, "product"}, {body, RenderedBody}, 
 		     {menu, CompiledMenu},
+		     {active1, ""}, {active2, "class=\"current_page_item\""},
+		     {active3, ""}, {active4, ""},  
+		     {action, "/products"}, {id, "id"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}],
 			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get(Data, "application/json") ->
@@ -84,6 +87,9 @@ get_list(Data, "text/html") ->
     sgte:render_str(CompiledTemplate, 
 		    [{title, "products"}, {body, RenderedBody},  
 		     {menu, CompiledMenu},
+		     {active1, ""}, {active2, "class=\"current_page_item\""},
+		     {active3, ""}, {active4, ""},  
+		     {action, "/products"}, {id, "id"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}],
 			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get_list(Data, "application/json") ->
@@ -113,4 +119,7 @@ new("text/html") ->
     sgte:render_str(CompiledTemplate, 
 		    [{title, "new product"}, {body, RenderedBody},
 		     {menu, CompiledMenu},
+		     {active1, ""}, {active2, "class=\"current_page_item\""},
+		     {active3, ""}, {active4, ""},  
+		     {action, "/products"}, {id, "id"},
 		     {elems, [[{link, "/products/search"}, {name,"Search"}]]}]).
