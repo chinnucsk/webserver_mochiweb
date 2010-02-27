@@ -1,6 +1,7 @@
 -module(product_render).
 
--export([get/2, get_list/2, create/1, new/1, search/1, edit/2, delete/1]).
+-export([get/2, get_list/2, create/1, new/1, search/1, edit/2, delete/1,
+	 update/1]).
 
 -include_lib("webapp.hrl").
 
@@ -24,6 +25,17 @@ delete("application/xml") ->
 delete("text/html") ->
     "<html>ok</html>";
 delete("application/json") ->
+    mochijson2:encode({struct,[{ok,true}]}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% /products/productId put
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+update("application/xml") ->
+    "ok";
+update("text/html") ->
+    "<html>ok</html>";
+update("application/json") ->
     mochijson2:encode({struct,[{ok,true}]}).
 
 
@@ -175,7 +187,7 @@ edit(Data, "text/html") ->
 		     {[{E, proplists:get_value(E,PL)} | Acc], PL}
 	     end,
 	     {[],Data},
-	     [name, tag, price, amount, description]),
+	     [id, name, tag, price, amount, description]),
     RenderedBody = sgte:render(CompiledBody, List),
     sgte:render_str(Compiled, 
 		    [{title, "product"}, {body, RenderedBody}, 

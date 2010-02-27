@@ -72,4 +72,29 @@ $(document).ready(function() {
   });
 
 
+  //Update a product
+  $("#update_form").bind("submit", function() {
+    var url = $(this).attr("action");
+    $.ajax({
+      type: "put",
+      url: url,
+      dataType: "json",
+      data: $(this).serialize(),
+      processData: false,
+      success: function(data) {
+	if(data["ok"] == true) {
+	  window.location.replace(url);
+	} else {
+	  alert("An error occurred");
+	}
+      },
+      error: function(xhr, textStatus, errorThrown) {
+	alert("Oooops! Request failed with status: " +
+	      xhr.status + " " + xhr.reponseText);
+      }
+    });
+    return false;
+  });
+
+
 });

@@ -68,7 +68,8 @@ product({Req, [Path], ResContentType, put}) ->
     Body = Req:parse_post(),
     try
 	product:update(Path, Body),
-	{200, [{?CT, ResContentType}], "ok"}
+	Response = product_render:update(ResContentType),
+	{200, [{?CT, ResContentType}], Response}
     catch
 	throw:bad_uri ->
 	    {404, [{?CT, "text/plain"}], "Not found"};
