@@ -1,6 +1,8 @@
 <div class="entry">
   $map element elems$
   <br/>
-  <a id="edit" class="button" href="/products/$id$/edit">Edit</a>
-  <a id="delete" class="button" href="/products/$id$">Delete</a>
+  $if edit$
+  <a id="edit" class="button" href="/$group$/$id$/edit">Edit</a>
+  $else$ $end if$
+  <a id="delete" class="button" href="/$group$/$id$">Delete</a>
 </div>

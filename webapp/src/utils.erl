@@ -42,6 +42,12 @@ parse_param(Value, int) when is_list(Value) ->
     catch
 	error:badarg -> throw(bad_request)
     end;
+parse_param(Value, no_format) when is_list(Value) ->
+    case length(Value) < 4 of
+	true -> throw(bad_request);
+	false ->
+	    Value
+    end;
 parse_param(_, _) ->
     throw(bad_request).
     

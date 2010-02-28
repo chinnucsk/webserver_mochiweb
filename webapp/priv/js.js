@@ -3,7 +3,8 @@ $(document).ready(function() {
   //Tweak for the quick search form
   $("#search-submit").click(function() {
     var id = $("#search-text").val();
-    window.location.replace("/products/" + id);
+    var url = $("#quick_search").attr("action");
+    window.location.replace(url + "/" + id);
     return false;
   });
 
@@ -18,10 +19,8 @@ $(document).ready(function() {
        data: $(this).serialize(),
        success:
 	 function(data) {
-	   alert(data);
 	   if(data["ok"] == true) {
-	     alert("soma");
-	     window.location.replace("/products");
+	     window.location.replace(action);
 	   } else {
 	     alert("The parameters provided are not correct");
 	   }
@@ -33,7 +32,7 @@ $(document).ready(function() {
     return false;
   });
 
-  //Disable empty fields in the search formso that they don't appear in the URI
+  //Disable empty fields in the search form so that they don't appear in the URI
   $("#search_form").submit(function() {
     //TODO: check params
     $(":input", this).each(function() {
@@ -65,7 +64,7 @@ $(document).ready(function() {
       },
       error: function(xhr, textStatus, errorThrown) {
 	alert("Oooops! Request failed with status: " +
-	      xhr.status + " " + xhr.reponseText);
+	      xhr.status + " " + xhr.responseText);
       }
     });
     return false;
@@ -90,7 +89,7 @@ $(document).ready(function() {
       },
       error: function(xhr, textStatus, errorThrown) {
 	alert("Oooops! Request failed with status: " +
-	      xhr.status + " " + xhr.reponseText);
+	      xhr.status + " " + xhr.responseText);
       }
     });
     return false;

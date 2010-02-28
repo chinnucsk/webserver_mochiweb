@@ -1,6 +1,6 @@
 -module(crud).
 
--export([create/4, get/2, delete/2, update/4]).
+-export([create/4, get/2, delete/2, update/4, create_with_id/5]).
 
 -include("webapp.hrl").
 
@@ -18,6 +18,19 @@ create(UserParams, ExpectedFields, ViewName, Type) ->
 		throw(db_error)
 	end,
     db:doc_create(?DB_NAME, NewObject).
+
+create_with_id(UserParams, ExpectedFields, ViewName, Type, IdField) ->
+    CheckedParams = utils:check_params(UserParams, ExpectedFields, [], create),
+    Id = proplists:get_value(IdField, CheckedParams),
+    Res = db:view_access(?DB_NAME, ViewName, [{key, Id}]),
+    case Res of
+	{ok, []} ->
+	    db:doc_create(?DB_NAME, [{"type", Type}|CheckedParams]);
+	{ok, [_]} ->
+	    throw(user_exists);
+	{error, _} ->
+	    throw(db_error)
+	end.
 
 get(Id, ViewName) ->
     case db:view_access(?DB_NAME, ViewName, [{key, Id}]) of

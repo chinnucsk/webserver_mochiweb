@@ -71,14 +71,16 @@ get(Data, "text/html") ->
 	     {[],Data},
 	     [name, tag, price, amount, description]),
     Id = proplists:get_value(id, Data),
-    RenderedBody = sgte:render(CompiledBody, [{element,CompiledElem},
+    RenderedBody = sgte:render(CompiledBody, [{group, "products"},
+					      {edit, "true"},
+					      {element,CompiledElem},
 					      {elems, List},{id,Id}]),
     sgte:render_str(Compiled, 
 		    [{title, "product"}, {body, RenderedBody}, 
 		     {menu, CompiledMenu},
 		     {active1, ""}, {active2, "class=\"current_page_item\""},
 		     {active3, ""}, {active4, ""},  
-		     {action, "/products"}, {id, "id"},
+		     {action, "/products"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}],
 			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get(Data, "application/json") ->
@@ -124,7 +126,7 @@ get_list(Data, "text/html") ->
 		     {menu, CompiledMenu},
 		     {active1, ""}, {active2, "class=\"current_page_item\""},
 		     {active3, ""}, {active4, ""},  
-		     {action, "/products"}, {id, "id"},
+		     {action, "/products"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}],
 			      [{link, "/products/search"}, {name,"Search"}]]}]);
 get_list(Data, "application/json") ->
@@ -154,7 +156,7 @@ new("text/html") ->
 		     {menu, CompiledMenu},
 		     {active1, ""}, {active2, "class=\"current_page_item\""},
 		     {active3, ""}, {active4, ""},  
-		     {action, "/products"}, {id, "id"},
+		     {action, "/products"},
 		     {elems, [[{link, "/products/search"}, {name,"Search"}]]}]).
 
 
@@ -171,7 +173,7 @@ search("text/html") ->
 		     {menu, CompiledMenu},
 		     {active1, ""}, {active2, "class=\"current_page_item\""},
 		     {active3, ""}, {active4, ""},  
-		     {action, "/products"}, {id, "id"},
+		     {action, "/products"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}]]}]).
 
 
@@ -190,10 +192,10 @@ edit(Data, "text/html") ->
 	     [id, name, tag, price, amount, description]),
     RenderedBody = sgte:render(CompiledBody, List),
     sgte:render_str(Compiled, 
-		    [{title, "product"}, {body, RenderedBody}, 
+		    [{title, "Edit product"}, {body, RenderedBody}, 
 		     {menu, CompiledMenu},
 		     {active1, ""}, {active2, "class=\"current_page_item\""},
 		     {active3, ""}, {active4, ""},  
-		     {action, "/products"}, {id, "id"},
+		     {action, "/products"},
 		     {elems, [[{link, "/products/new"}, {name,"New"}],
 			      [{link, "/products/search"}, {name,"Search"}]]}]).

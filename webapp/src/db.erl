@@ -48,11 +48,16 @@ init_views([]) ->
     ok.
 
 views() ->
-    [{?PROD_VIEW, product_view()}].
+    [{?PROD_VIEW, product_view()},
+     {?USER_VIEW, user_view()}].
 
 product_view() ->
     "function(doc) {"
 	"if(doc.type == 'product') {emit(doc.id, doc); }}".
+
+user_view() ->
+    "function(doc) {"
+	"if(doc.type == 'user') {emit(doc.username, doc); }}".
 
 stop() ->
     ok = application:stop(inets),
@@ -285,7 +290,7 @@ user_unfriendlyaze([{K,V} = H|T], Res) ->
 		    case is_list(V) of
 			true ->
 			    user_unfriendlyaze(
-			      T, [{K,"\"" ++ V ++ "\""}|Res]);
+			      T, [{K,lists:flatten(io_lib:format("~w",[V]))}|Res]);
 			false ->
 			    user_unfriendlyaze(T, [{K,V}|Res])
 		    end
